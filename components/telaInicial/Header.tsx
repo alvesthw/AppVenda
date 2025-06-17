@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function Header() {
   const dataAtual = format(new Date(), "dd 'de' MMMM", { locale: ptBR });
@@ -23,7 +23,6 @@ export default function Header() {
 const styles = StyleSheet.create({
   header: {
     padding: 16,
-    backgroundColor: '#D9D9D9',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -37,6 +36,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     paddingTop: 5,
+    color: 'white',
   },
   dataTexto: {
     fontSize: 12,

@@ -1,6 +1,6 @@
-import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Trufa } from '../../utils/types';
 
 interface Props {
@@ -10,12 +10,16 @@ interface Props {
 
 export default function TruffleTypeScroll({ trufas, onExcluir }: Props) {
   const router = useRouter();
-
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-
       {trufas.map((trufa) => (
         <View key={trufa.id} style={styles.trufaItem}>
+          {trufa.image && (
+            <Image
+              source={{ uri: trufa.image }}
+              style={styles.trufaImagem}
+            />
+          )}
           <View style={styles.trufaInfo}>
             <Text style={styles.trufaNome}>{trufa.nome}</Text>
           </View>
@@ -36,22 +40,24 @@ export default function TruffleTypeScroll({ trufas, onExcluir }: Props) {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    padding: 16,
-    backgroundColor: '#F2F2F2',
-    height: '100%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginHorizontal: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  trufaImagem: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    margin: 5,
   },
   trufaItem: {
     flexDirection: 'row',
-    backgroundColor: '#8C8C8C',
+    backgroundColor: '#F2F2F2',
     borderRadius: 8,
     marginBottom: 12,
     width: '100%',
-    height: 90,
-    overflow: 'hidden',
-    position: 'relative', // necessário para posicionar a bolinha
+    minHeight: 90,
+    alignItems: 'center',
+    position: 'relative',
   },
   trufaInfo: {
     flex: 1,
@@ -66,7 +72,7 @@ const styles = StyleSheet.create({
   excluirArea: {
     position: 'absolute',
     top: 8,
-    right: 8, // <-- aqui está a mudança
+    right: 8,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -76,9 +82,9 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   addButtonContainer: {
-    backgroundColor: '#D9D9D9',
-    height: 90,
-    borderRadius: 8,
+    backgroundColor: '#92A4A6',
+    height: 70,
+    borderRadius: 25,
     marginBottom: 16,
     alignItems: 'center',
     justifyContent: 'center',
