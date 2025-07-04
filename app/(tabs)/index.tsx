@@ -9,10 +9,6 @@ import TruffleTypeScroll from '../../components/telaInicial/TruffleTypeScroll';
 import { buscarTrufas } from '../../utils/storage';
 import { Trufa } from '../../utils/types'; // ajuste o caminho conforme necessário
 
-
-
-
-
 export default function HomeScreen() {
   const [trufas, setTrufas] = useState<Trufa[]>([]);
   const excluirTrufa = (id: string) => {

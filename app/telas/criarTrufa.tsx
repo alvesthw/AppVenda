@@ -8,6 +8,7 @@ import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } fro
 export default function CriarTrufa() {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [preco, setPreco] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -33,7 +34,7 @@ export default function CriarTrufa() {
 
   // Função para salvar a trufa
   const salvarTrufa = async () => {
-    if (!nome.trim() || !descricao.trim() || !image?.trim()) {
+    if (!nome.trim() || !descricao.trim() || !image?.trim() || !preco?.trim()) {
       Alert.alert('Erro', 'Preencha todos os campos e selecione uma imagem.');
       return;
     }
@@ -51,6 +52,7 @@ export default function CriarTrufa() {
         id: Date.now().toString(),
         nome,
         descricao,
+        preco,
         image: newPath, // salva o novo caminho
       };
 
@@ -62,6 +64,7 @@ export default function CriarTrufa() {
       Alert.alert('Sucesso', 'Trufa salva com sucesso!');
       setNome('');
       setDescricao('');
+      setPreco('');
       setImage(null);
       router.back();
     } catch (error) {
@@ -78,9 +81,17 @@ export default function CriarTrufa() {
         <Text style={styles.buttonText}>Selecionar Imagem</Text>
       </TouchableOpacity>
 
+      {image && (
+        <Image
+          source={{ uri: image }}
+          style={{ width: '100%', height: 200, marginTop: 10, borderRadius: 10 }}
+        />
+      )}
+
       <TextInput
         style={styles.input}
         placeholder="Nome da trufa"
+        placeholderTextColor="#D7D7D9" // preto
         value={nome}
         onChangeText={setNome}
       />
@@ -88,16 +99,18 @@ export default function CriarTrufa() {
       <TextInput
         style={styles.input}
         placeholder="Descrição"
+        placeholderTextColor="#D7D7D9" // preto
         value={descricao}
         onChangeText={setDescricao}
       />
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={{ width: '100%', height: 200, marginTop: 10, borderRadius: 10 }}
-        />
-      )}
+      <TextInput
+        style={styles.input}
+        placeholder="Preço"
+        placeholderTextColor="#D7D7D9" // preto
+        value={preco}
+        onChangeText={setPreco}
+      />
 
       <TouchableOpacity style={styles.button} onPress={salvarTrufa}>
         <Text style={styles.buttonText}>Salvar</Text>
