@@ -1,22 +1,32 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system'; // Necessário para salvar a imagem localmente
-import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function CriarTrufa() {
-  const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [preco, setPreco] = useState('');
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [preco, setPreco] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const router = useRouter();
 
-  // Função para escolher imagem da galeria
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert('Permissão negada', 'Você precisa permitir o acesso à galeria.');
+      Alert.alert(
+        "Permissão negada",
+        "Você precisa permitir o acesso à galeria."
+      );
       return;
     }
 
@@ -32,16 +42,20 @@ export default function CriarTrufa() {
     }
   };
 
-  // Função para salvar a trufa
   const salvarTrufa = async () => {
     if (!nome.trim() || !descricao.trim() || !image?.trim() || !preco?.trim()) {
-      Alert.alert('Erro', 'Preencha todos os campos e selecione uma imagem.');
+      Alert.alert("Erro", "Preencha todos os campos e selecione uma imagem.");
+      return;
+    }
+
+    const precoFloat = parseFloat(preco);
+    if (isNaN(precoFloat)) {
+      Alert.alert("Erro", "Preço inválido.");
       return;
     }
 
     try {
-      // Copiar imagem para o diretório persistente
-      const fileName = image.split('/').pop();
+      const fileName = image.split("/").pop();
       const newPath = `${FileSystem.documentDirectory}${fileName}`;
       await FileSystem.copyAsync({
         from: image,
@@ -52,24 +66,24 @@ export default function CriarTrufa() {
         id: Date.now().toString(),
         nome,
         descricao,
-        preco,
-        image: newPath, // salva o novo caminho
+        preco: precoFloat,
+        image: newPath,
       };
 
-      const trufasSalvas = await AsyncStorage.getItem('trufas');
+      const trufasSalvas = await AsyncStorage.getItem("trufas");
       const trufas = trufasSalvas ? JSON.parse(trufasSalvas) : [];
       trufas.push(novaTrufa);
-      await AsyncStorage.setItem('trufas', JSON.stringify(trufas));
+      await AsyncStorage.setItem("trufas", JSON.stringify(trufas));
 
-      Alert.alert('Sucesso', 'Trufa salva com sucesso!');
-      setNome('');
-      setDescricao('');
-      setPreco('');
+      Alert.alert("Sucesso", "Trufa salva com sucesso!");
+      setNome("");
+      setDescricao("");
+      setPreco("");
       setImage(null);
       router.back();
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível salvar a trufa.');
-      console.error('Erro ao salvar trufa:', error);
+      Alert.alert("Erro", "Não foi possível salvar a trufa.");
+      console.error("Erro ao salvar trufa:", error);
     }
   };
 
@@ -84,14 +98,19 @@ export default function CriarTrufa() {
       {image && (
         <Image
           source={{ uri: image }}
-          style={{ width: '100%', height: 200, marginTop: 10, borderRadius: 10 }}
+          style={{
+            width: "100%",
+            height: 200,
+            marginTop: 10,
+            borderRadius: 10,
+          }}
         />
       )}
 
       <TextInput
         style={styles.input}
         placeholder="Nome da trufa"
-        placeholderTextColor="#D7D7D9" // preto
+        placeholderTextColor="#D7D7D9"
         value={nome}
         onChangeText={setNome}
       />
@@ -99,7 +118,7 @@ export default function CriarTrufa() {
       <TextInput
         style={styles.input}
         placeholder="Descrição"
-        placeholderTextColor="#D7D7D9" // preto
+        placeholderTextColor="#D7D7D9"
         value={descricao}
         onChangeText={setDescricao}
       />
@@ -107,7 +126,8 @@ export default function CriarTrufa() {
       <TextInput
         style={styles.input}
         placeholder="Preço"
-        placeholderTextColor="#D7D7D9" // preto
+        placeholderTextColor="#D7D7D9"
+        keyboardType="numeric"
         value={preco}
         onChangeText={setPreco}
       />
@@ -123,30 +143,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     marginTop: 10,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   button: {
-    backgroundColor: '#6200ea',
+    backgroundColor: "#6200ea",
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });

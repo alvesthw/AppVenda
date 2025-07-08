@@ -9,10 +9,23 @@
 // garantindo consistência e evitando erros de digitação ou estrutura incorreta.
 
 
+// utils/types.tsx
+
 export interface Trufa {
-  image: any;
   id: string;
   nome: string;
-  preco: string
   descricao: string;
+  preco: number;
+  image?: string;
+  quantidadeVendida: number;
+  quantidadeEstoque: number;
 }
+
+export interface Venda {
+  id: string;
+  trufaId: string;
+  quantidade: number;
+  valor: number;
+  data: string;
+}
+
