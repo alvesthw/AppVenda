@@ -1,3 +1,4 @@
+
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -37,9 +38,9 @@ export default function TruffleTypeScroll({
 }: Props) {
   const router = useRouter();
   const [trufaSelecionada, setTrufaSelecionada] = useState<Trufa | null>(null);
-
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
+
       <View style={styles.gridContainer}>
         {trufas.map((trufa) => (
           <TouchableOpacity
@@ -80,7 +81,6 @@ export default function TruffleTypeScroll({
 const styles = StyleSheet.create({
   scrollContainer: {
     padding: 16,
-    backgroundColor: "#3B3C40",
     borderRadius: 10,
     height: "100%",
   },

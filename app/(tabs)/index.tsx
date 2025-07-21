@@ -4,7 +4,6 @@ import React, { useCallback, useState } from "react";
 import { Alert, StatusBar, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/telaInicial/Header";
-import SearchBar from "../../components/telaInicial/SearchBar";
 import TruffleTypeScroll from "../../components/telaInicial/TruffleTypeScroll";
 import { buscarTrufas } from "../../utils/storage";
 import { Trufa } from "../../utils/types";
@@ -84,7 +83,6 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <Header />
-      <SearchBar />
       <View style={styles.itens}>
         <TruffleTypeScroll
           trufas={trufas}
@@ -101,9 +99,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#F2F2F2",
   },
   itens: {
-    paddingTop: 20,
+    margin: 16,
+    borderRadius: 10,
+    backgroundColor: "#1E6FD9",
   },
 });
