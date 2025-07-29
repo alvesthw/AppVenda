@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     alignSelf: "center",
-    height: "100%", // ✅ garante que o fundo preencha a altura da tab bar
+    height: "100%",
     borderRadius: 30,
     overflow: "hidden",
   } as ViewStyle,

@@ -19,6 +19,7 @@ export interface Trufa {
   image?: string;
   quantidadeVendida: number;
   quantidadeEstoque: number;
+  ativa?: boolean;
 }
 
 export interface Venda {

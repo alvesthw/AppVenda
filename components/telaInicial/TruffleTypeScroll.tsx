@@ -1,4 +1,3 @@
-
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -12,8 +11,9 @@ import {
   View,
 } from "react-native";
 import { Trufa } from "../../utils/types";
-import TruffleModal from "./TruffleModal"; // ajuste o caminho se necessário
+import TruffleModal from "./TruffleModal";
 
+// Habilita animações no Android
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -26,7 +26,9 @@ interface Props {
   onExcluir: (id: string) => void;
   onRegistrarVenda: (id: string) => void;
   onAdicionarEstoque: (id: string) => void;
-  onAtualizarQuantidade: (id: string, delta: number) => void; // ✅ Adicione esta linha
+  onAtualizarQuantidade: (id: string, delta: number) => void;
+  quantidadesVendidas?: { [trufaId: string]: number };
+  onAtualizarTrufa?: () => void;
 }
 
 export default function TruffleTypeScroll({
@@ -35,88 +37,131 @@ export default function TruffleTypeScroll({
   onRegistrarVenda,
   onAdicionarEstoque,
   onAtualizarQuantidade,
+  quantidadesVendidas = {},
+  onAtualizarTrufa,
 }: Props) {
   const router = useRouter();
   const [trufaSelecionada, setTrufaSelecionada] = useState<Trufa | null>(null);
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-      <View style={styles.gridContainer}>
-        {trufas.map((trufa) => (
-          <TouchableOpacity
-            key={trufa.id}
-            style={styles.trufaItem}
-            onPress={() => setTrufaSelecionada(trufa)}
-            activeOpacity={0.9}
-          >
-            {trufa.image && (
-              <Image source={{ uri: trufa.image }} style={styles.trufaImagem} />
-            )}
-            <View style={styles.trufaInfo}>
-              <Text style={styles.trufaNome}>{trufa.nome}</Text>
-              <Text style={styles.trufaDescricao}>R$ {trufa.preco}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-
+    <View style={styles.container}>
+      {/* Botão "Nova Trufa" */}
       <TouchableOpacity onPress={() => router.push("/telas/criarTrufa")}>
         <View style={styles.addButtonContainer}>
-          <Text style={styles.addButtonText}>+ Nova Trufa</Text>
+          <Text style={styles.addButtonText}>+</Text>
         </View>
       </TouchableOpacity>
 
-      <TruffleModal
-        trufa={trufaSelecionada}
-        onClose={() => setTrufaSelecionada(null)}
-        onExcluir={onExcluir}
-        onRegistrarVenda={onRegistrarVenda} // ✅ Aqui está certo agora
-        onAdicionarEstoque={onAdicionarEstoque}
-        onAtualizarQuantidade={onAtualizarQuantidade}
-      />
-    </ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.gridContainer}>
+          {trufas.map((trufa) => (
+            <TouchableOpacity
+              key={trufa.id}
+              style={[
+                styles.trufaItem,
+                !trufa.ativa && styles.trufaItemInativo,
+              ]}
+              onPress={() => setTrufaSelecionada(trufa)}
+              activeOpacity={0.9}
+            >
+              <View style={styles.trufaContent}>
+                {/* Imagem à esquerda */}
+                {trufa.image && (
+                  <Image
+                    source={{ uri: trufa.image }}
+                    style={styles.trufaImagem}
+                  />
+                )}
+
+                {/* Informações à direita */}
+                <View style={styles.trufaInfo}>
+                  <Text style={styles.trufaNome}>{trufa.nome}</Text>
+                  <Text style={styles.trufaDescricao}>R$ {trufa.preco}</Text>
+                  <Text style={styles.trufaQuantidade}>
+                    Vendidas: {quantidadesVendidas[trufa.id] ?? 0}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Modal de detalhes */}
+        <TruffleModal
+          trufa={trufaSelecionada}
+          onClose={() => setTrufaSelecionada(null)}
+          onExcluir={onExcluir}
+          onRegistrarVenda={onRegistrarVenda}
+          onAdicionarEstoque={onAdicionarEstoque}
+          onAtualizarQuantidade={onAtualizarQuantidade}
+          onAtualizarTrufa={onAtualizarTrufa}
+        />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  container: {
     padding: 16,
+  },
+  scrollContainer: {
     borderRadius: 10,
-    height: "100%",
+    minHeight: "100%",
   },
   gridContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
   trufaItem: {
-    width: "48%",
+    width: "100%",
     backgroundColor: "white",
     marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: 20,
     padding: 10,
   },
-  trufaImagem: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+  trufaItemInativo: {
+    opacity: 0.2,
   },
+
+  trufaContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  trufaImagem: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    marginRight: 12,
+  },
+
   trufaInfo: {
+    flex: 1,
     flexDirection: "column",
-    marginTop: 8,
   },
   trufaNome: {
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
   },
   trufaDescricao: {
     fontSize: 16,
+    color: "black",
   },
+  trufaQuantidade: {
+    fontSize: 14,
+    color: "#2a9d8f",
+    marginTop: 4,
+  },
+
   addButtonContainer: {
-    marginTop: 20,
+    marginBottom: 16,
     alignItems: "center",
-    backgroundColor: "#BDBEBF",
-    padding: 20,
+    backgroundColor: "#0D0D0D",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 10,
   },
   addButtonText: {

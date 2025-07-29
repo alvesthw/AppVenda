@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F2F2F2",
   },
   titulo: {
     fontSize: 22,

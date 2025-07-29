@@ -1,11 +1,36 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 export default function Header() {
   const dataAtual = format(new Date(), "dd 'de' MMMM", { locale: ptBR });
   const diaSemana = format(new Date(), "EEEE", { locale: ptBR });
+  const [totalVendas, setTotalVendas] = useState<number | null>(null);
+
+  useEffect(() => {
+    const carregarTotalVendas = async () => {
+      try {
+        const hoje = new Date().toISOString().split("T")[0];
+        const dadosVendas = await AsyncStorage.getItem("vendas");
+
+        const listaVendas = dadosVendas ? JSON.parse(dadosVendas) : [];
+
+        const vendasHoje = listaVendas.filter((v: any) => v.data === hoje);
+
+        const total = vendasHoje.reduce(
+          (soma: number, venda: any) => soma + (venda.valor ?? 0),
+          0
+        );
+
+        setTotalVendas(total);
+      } catch (error) {
+        console.error("Erro ao carregar total de vendas:", error);
+      }
+    };
+    carregarTotalVendas();
+  }, []);
 
   return (
     <View>
@@ -22,13 +47,18 @@ export default function Header() {
         {/* Nome e saudação */}
         <View style={styles.infoContainer}>
           <Text style={styles.title1}>Hey,</Text>
-          <Text style={styles.title}>Vinicius</Text>
+          <Text style={styles.title}>User</Text>
         </View>
 
         {/* Caixa azul com valor */}
         <View style={styles.valorContainer}>
-          <Text style={styles.valorTexto}>R$ 400,00</Text>
+          <Text style={styles.valorTexto}>
+            {totalVendas !== null
+              ? `R$ ${totalVendas.toFixed(2)}`
+              : "Carregando..."}
+          </Text>
         </View>
+
       </View>
 
       {/* Data centralizada abaixo */}
@@ -68,7 +98,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   valorContainer: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#0D0D0D",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,

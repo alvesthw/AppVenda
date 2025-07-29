@@ -6,10 +6,15 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
@@ -21,7 +26,8 @@ export default function CriarTrufa() {
   const router = useRouter();
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert(
         "Permissão negada",
@@ -48,7 +54,8 @@ export default function CriarTrufa() {
       return;
     }
 
-    const precoFloat = parseFloat(preco);
+    const precoFloat = parseFloat(preco.replace(",", "."));
+
     if (isNaN(precoFloat)) {
       Alert.alert("Erro", "Preço inválido.");
       return;
@@ -57,10 +64,7 @@ export default function CriarTrufa() {
     try {
       const fileName = image.split("/").pop();
       const newPath = `${FileSystem.documentDirectory}${fileName}`;
-      await FileSystem.copyAsync({
-        from: image,
-        to: newPath,
-      });
+      await FileSystem.copyAsync({ from: image, to: newPath });
 
       const novaTrufa = {
         id: Date.now().toString(),
@@ -88,60 +92,65 @@ export default function CriarTrufa() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Nova Trufa</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Criar Nova Trufa</Text>
 
-      <TouchableOpacity style={styles.button} onPress={pickImage}>
-        <Text style={styles.buttonText}>Selecionar Imagem</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={pickImage}>
+            <Text style={styles.buttonText}>Selecionar Imagem</Text>
+          </TouchableOpacity>
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={{
-            width: "100%",
-            height: 200,
-            marginTop: 10,
-            borderRadius: 10,
-          }}
-        />
-      )}
+          <View style={styles.imageFrame}>
+            {image && <Image source={{ uri: image }} style={styles.image} />}
+          </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome da trufa"
-        placeholderTextColor="#D7D7D9"
-        value={nome}
-        onChangeText={setNome}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Nome da trufa"
+            placeholderTextColor="#D7D7D9"
+            value={nome}
+            onChangeText={setNome}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Descrição"
-        placeholderTextColor="#D7D7D9"
-        value={descricao}
-        onChangeText={setDescricao}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Descrição"
+            placeholderTextColor="#D7D7D9"
+            value={descricao}
+            onChangeText={setDescricao}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Preço"
-        placeholderTextColor="#D7D7D9"
-        keyboardType="numeric"
-        value={preco}
-        onChangeText={setPreco}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Preço"
+            placeholderTextColor="#D7D7D9"
+            keyboardType="numeric"
+            value={preco}
+            onChangeText={(text) => {
+              // Remove tudo que não for número ou vírgula
+              const cleaned = text.replace(/[^0-9,]/g, "");
 
-      <TouchableOpacity style={styles.button} onPress={salvarTrufa}>
-        <Text style={styles.buttonText}>Salvar</Text>
-      </TouchableOpacity>
-    </View>
+              // Formata automaticamente para duas casas decimais
+              const numeric = cleaned.replace(",", ".");
+              setPreco(numeric);
+            }}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={salvarTrufa}>
+            <Text style={styles.buttonText}>Salvar</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: "#fff",
   },
@@ -168,5 +177,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
+  },
+  imageFrame: {
+    width: "100%",
+    height: 200,
+    marginTop: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
   },
 });

@@ -1,15 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
-import { Alert, StatusBar, StyleSheet, View } from "react-native";
+import { Alert, StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/telaInicial/Header";
 import TruffleTypeScroll from "../../components/telaInicial/TruffleTypeScroll";
 import { buscarTrufas } from "../../utils/storage";
-import { Trufa } from "../../utils/types";
+import { Trufa, Venda } from "../../utils/types";
 
 export default function HomeScreen() {
   const [trufas, setTrufas] = useState<Trufa[]>([]);
+  const [quantidadesVendidas, setQuantidadesVendidas] = useState<{
+    [trufaId: string]: number;
+  }>({});
 
   const carregarTrufas = async () => {
     try {
@@ -18,6 +21,28 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("Erro ao carregar trufas:", error);
       setTrufas([]);
+    }
+  };
+
+  const carregarVendas = async () => {
+    try {
+      const hoje = new Date().toISOString().split("T")[0];
+      const dadosVendas = await AsyncStorage.getItem("vendas");
+      const listaVendas: Venda[] = dadosVendas ? JSON.parse(dadosVendas) : [];
+
+      const vendasHoje = listaVendas.filter((v) => v.data === hoje);
+
+      const agrupadas = vendasHoje.reduce(
+        (acc: { [trufaId: string]: number }, venda) => {
+          acc[venda.trufaId] = (acc[venda.trufaId] || 0) + venda.quantidade;
+          return acc;
+        },
+        {}
+      );
+
+      setQuantidadesVendidas(agrupadas);
+    } catch (error) {
+      console.error("Erro ao carregar vendas:", error);
     }
   };
 
@@ -76,6 +101,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       carregarTrufas();
+      carregarVendas(); // ✅ carrega as vendas do dia
     }, [])
   );
 
@@ -83,15 +109,15 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <Header />
-      <View style={styles.itens}>
-        <TruffleTypeScroll
-          trufas={trufas}
-          onExcluir={excluirTrufa}
-          onRegistrarVenda={() => {}}
-          onAdicionarEstoque={adicionarEstoque}
-          onAtualizarQuantidade={atualizarQuantidadeVendida}
-        />
-      </View>
+      <TruffleTypeScroll
+        trufas={trufas}
+        onExcluir={excluirTrufa}
+        onRegistrarVenda={() => {}}
+        onAdicionarEstoque={adicionarEstoque}
+        onAtualizarQuantidade={atualizarQuantidadeVendida}
+        quantidadesVendidas={quantidadesVendidas}
+        onAtualizarTrufa={carregarTrufas} // ✅ Adiciona aqui
+      />
     </SafeAreaView>
   );
 }
@@ -100,10 +126,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F2F2F2",
-  },
-  itens: {
-    margin: 16,
-    borderRadius: 10,
-    backgroundColor: "#1E6FD9",
   },
 });

@@ -1,7 +1,7 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -18,18 +18,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
-      <Stack>
-        {/* Definição das abas principais */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        {/* Tela Criar Trufa fora das abas */}
-        <Stack.Screen name="telas/criarTrufa" options={{ title: 'Criar Trufa' }} />
-
-        {/* Tela para rotas não encontradas */}
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="dark" backgroundColor="#FFFFFF" />
-
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="telas/criarTrufa" options={{ title: 'Criar Trufa' }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </View>
     </ThemeProvider>
   );
 }

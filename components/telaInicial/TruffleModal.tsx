@@ -1,6 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Trufa } from "../../utils/types";
@@ -12,6 +19,7 @@ interface Props {
   onRegistrarVenda: (id: string) => void;
   onAdicionarEstoque: (id: string) => void;
   onAtualizarQuantidade: (id: string, delta: number) => void;
+  onAtualizarTrufa?: () => void;
 }
 
 export default function TruffleModal({
@@ -21,9 +29,19 @@ export default function TruffleModal({
   onRegistrarVenda,
   onAdicionarEstoque,
   onAtualizarQuantidade,
+  onAtualizarTrufa
 }: Props) {
   const [vendasAtuais, setVendasAtuais] = useState(0);
   const [vendasTotaisHoje, setVendasTotaisHoje] = useState(0);
+  const [ativa, setAtiva] = useState(true);
+
+  useEffect(() => {
+    if (trufa) {
+      setVendasAtuais(0);
+      setAtiva(trufa.ativa ?? true);
+      carregarVendasTotais();
+    }
+  }, [trufa]);
 
   const carregarVendasTotais = async () => {
     try {
@@ -39,12 +57,24 @@ export default function TruffleModal({
     }
   };
 
-  useEffect(() => {
-    if (trufa) {
-      setVendasAtuais(0);
-      carregarVendasTotais();
+  const atualizarStatusTrufa = async (ativa: boolean) => {
+    try {
+      const dados = await AsyncStorage.getItem("trufas");
+      const lista: Trufa[] = dados ? JSON.parse(dados) : [];
+
+      const atualizadas = lista.map((t) =>
+        t.id === trufa?.id ? { ...t, ativa } : t
+      );
+
+      await AsyncStorage.setItem("trufas", JSON.stringify(atualizadas));
+      setAtiva(ativa);
+
+      // ✅ Notifica o componente pai para recarregar a lista
+      onAtualizarTrufa?.();
+    } catch (error) {
+      console.error("Erro ao atualizar status da trufa:", error);
     }
-  }, [trufa]);
+  };
 
   if (!trufa) return null;
 
@@ -76,6 +106,15 @@ export default function TruffleModal({
 
         <Text style={styles.trufaNome}>{trufa.nome}</Text>
         <Text style={styles.trufaDescricao}>{trufa.descricao}</Text>
+
+        {/* ✅ Switch de ativação */}
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>Ativa:</Text>
+          <Switch
+            value={ativa}
+            onValueChange={(valor) => atualizarStatusTrufa(valor)}
+          />
+        </View>
 
         <Text style={styles.vendasTitulo}>
           Vendas totais hoje: {vendasTotaisHoje}
@@ -117,8 +156,7 @@ export default function TruffleModal({
                 const lista = dados ? JSON.parse(dados) : [];
                 lista.push(novaVenda);
                 await AsyncStorage.setItem("vendas", JSON.stringify(lista));
-                console.log("Venda registrada:", novaVenda);
-                await carregarVendasTotais(); // Atualiza o total
+                await carregarVendasTotais();
                 onRegistrarVenda(trufa.id);
               } catch (error) {
                 console.error("Erro ao registrar venda:", error);
@@ -163,6 +201,15 @@ const styles = StyleSheet.create({
   trufaDescricao: {
     fontSize: 16,
     marginBottom: 12,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  switchLabel: {
+    fontSize: 16,
+    marginRight: 10,
   },
   contadorContainer: {
     flexDirection: "row",
